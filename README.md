@@ -3,8 +3,8 @@ I might also add you as a contributor on steam.
 
 [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=1104855706)
 
-#[TTT] Dart Gun
-###Description
+# [TTT] Dart Gun
+### Description
 The Dart Gun is a Poison type Gun. It has 3 Types of darts, Poison, Muteness and Blindness.
 You can change dart type by clicking on the right mouse button (aka SecondaryFire).
 This script works with TTT gamemode only.
