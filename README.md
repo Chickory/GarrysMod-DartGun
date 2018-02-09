@@ -5,5 +5,5 @@ I might also add you as a contributor on steam.
 
 # [TTT] Dart Gun
 ### TO-DO List:
-..* Tell victim when he is muted. (Icon on Hud?)
-..* Nothing else for now...
+* Tell victim when he is muted. (Icon on Hud?)
+* Nothing else for now...
