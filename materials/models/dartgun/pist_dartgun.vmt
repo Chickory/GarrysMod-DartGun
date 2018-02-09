@@ -1,0 +1,7 @@
+VertexLitGeneric
+{
+	"$basetexture"	"models\dartgun\pist_dartgun"
+	"$envmap" "env_cubemap"
+	"$envmapmask" "models\dartgun\pist_dartgun_ref"
+
+}
