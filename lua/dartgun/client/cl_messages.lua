@@ -10,3 +10,9 @@ net.Receive("DartGun_DartType", function(len)
 	// Chat Sound
 	chat.PlaySound()
 end)
+
+hook.Add("HUDPaint", "WarnLocalPlyMute", function()
+	if (LocalPlayer():GetNWInt("fon_muteness") == 1) then
+		draw.DrawText("You have been muted!", "Trebuchet24", ScrW() * 0.5, (ScrH() * 0.25)-80, Color(0, 150, 255, 255), TEXT_ALIGN_CENTER)
+	end
+end)

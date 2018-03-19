@@ -1,29 +1,36 @@
 AddCSLuaFile()
 
-// If gamemode isn't TTT then do not run this script
-if (engine.ActiveGamemode() != "terrortown") then return end
+// If gamemode isn't Sandbox then do not run this script
+// Almost no changes were made
+if (engine.ActiveGamemode() != "sandbox") then return end
 
-SWEP.HoldType   = "pistol"
-
-if CLIENT then
-    SWEP.PrintName = "Dart Gun"
-    SWEP.Author  = "Axspeo"
-    SWEP.Slot = 6
-
-    SWEP.EquipMenuData = {
-      type = "Poison",
-      desc = [[The Dart Gun is a Poison type Gun. 
+SWEP.Base         = "weapon_base"
+SWEP.PrintName    = "Dart Gun"
+SWEP.Author       = "Axspeo"
+SWEP.Instructions = [[The Dart Gun is a Poison type Gun. 
 	It has 3 Types of darts, 
 	Poison, Muteness and Blindness.
 	You can change dart type by clicking on the 
 	right mouse button (aka SecondaryFire).]]
-    };
+	
+SWEP.HoldType   = "pistol"
+SWEP.Slot    = 1
+SWEP.SlotPos = 0
+SWEP.Weight  = 5
+SWEP.AutoSwitchTo   = true
+SWEP.AutoSwitchFrom = false
 
-    SWEP.Icon = "vgui/ttt/icon_fon_dartgun"
-end
+SWEP.Spawnable = true
+SWEP.AdminSpawnable = true
 
-// Init
-SWEP.Base = "weapon_tttbase"
+SWEP.ViewModelFlip = true
+SWEP.UseHands = false
+SWEP.DrawCrosshair = true
+
+// SWEP.WepSelectIcon -- TO-DO
+
+SWEP.ShouldDropOnDie = true
+
 SWEP.Primary.Recoil	= 4
 SWEP.Primary.Damage = DartGun.BaseDamage
 SWEP.Primary.Delay = 0.80
@@ -33,11 +40,11 @@ SWEP.Primary.Automatic = false
 SWEP.Primary.DefaultClip = 5
 SWEP.Primary.ClipMax = 5
 
-SWEP.Kind = WEAPON_EQUIP
-SWEP.CanBuy = {ROLE_TRAITOR}
-SWEP.LimitedStock = true
+// ----------------------------------------------------------------
 
-SWEP.IsSilent = true
+// Models
+SWEP.ViewModel			= "models/dartgun/v_fon_dartgun.mdl"
+SWEP.WorldModel			= "models/dartgun/w_fon_dartgun.mdl"
 
 // Draw World Model -----------------------------------------------
 SWEP.Offset = {
@@ -55,35 +62,35 @@ SWEP.Offset = {
     }
 }
 
-function SWEP:DrawWorldModel( )
-	if ( SERVER ) then return end
+function SWEP:DrawWorldModel()
+	if (SERVER) then return end
     local ply = self:GetOwner()
 
-    if IsValid( ply ) then
-        local bone_rh = ply:LookupBone( "ValveBiped.Bip01_R_Hand" )
+    if IsValid(ply) then
+        local bone_rh = ply:LookupBone("ValveBiped.Bip01_R_Hand")
         if bone_rh then
-            local pos, ang = ply:GetBonePosition( bone_rh )
+            local pos, ang = ply:GetBonePosition(bone_rh)
             pos = pos + ang:Forward() * self.Offset.Pos.Forward + ang:Right() * self.Offset.Pos.Right + ang:Up() * self.Offset.Pos.Up
 
-            ang:RotateAroundAxis( ang:Up(), self.Offset.Ang.Up)
-            ang:RotateAroundAxis( ang:Right(), self.Offset.Ang.Right )
-            ang:RotateAroundAxis( ang:Forward(),  self.Offset.Ang.Forward )
+            ang:RotateAroundAxis(ang:Up(), self.Offset.Ang.Up)
+            ang:RotateAroundAxis(ang:Right(), self.Offset.Ang.Right)
+            ang:RotateAroundAxis(ang:Forward(),  self.Offset.Ang.Forward)
 
-            self:SetRenderOrigin( pos )
-            self:SetRenderAngles( ang )
+            self:SetRenderOrigin(pos)
+            self:SetRenderAngles(ang)
             self:DrawModel()
         end
     else
-        self:SetRenderOrigin( nil )
-        self:SetRenderAngles( nil )
+        self:SetRenderOrigin(nil)
+        self:SetRenderAngles(nil)
         self:DrawModel()
     end
 end
 // ----------------------------------------------------------------
 
-function SWEP:Reload()
-	self.Weapon:DefaultReload(ACT_VM_RELOAD_SILENCED);
-end
+// Shot Sound
+SWEP.Primary.Sound = Sound("weapons/usp/usp1.wav")
+SWEP.Primary.SoundLevel = 50
 
 // Draw if target is poisoned/muted/blinded to Traitors ----------------------------
 // Effect Icons
@@ -93,72 +100,70 @@ local blindness_effect_icon = Material("vgui/fon/icon_blindness")
 local transparency_icons = Color(255, 255, 255, 140)
 
 // Draw Effects above the targets head
-function WarnTraitorsIcons()
+function WarnIcons()
     client = LocalPlayer()
     players = player.GetAll()
 
-    if client:GetTraitor() then
-        normal = client:GetForward() * -1
-		render.SetMaterial(poison_effect_icon)
+    normal = client:GetForward() * -1
+	render.SetMaterial(poison_effect_icon)
 		
-        for i=1, #players do
-            ply = players[i]
+    for i=1, #players do
+        ply = players[i]
 			
-            if (ply:GetNWInt("fon_poison") == 1) and ply != client then
-				pos_p = ply:GetPos()
-				pos_p.z = pos_p.z + 72
+        if (ply:GetNWInt("fon_poison") == 1) and ply != client then
+			pos_p = ply:GetPos()
+			pos_p.z = pos_p.z + 72
 
-				render.DrawQuadEasy(pos_p, normal, 8, 8, transparency_icons, 180)
-			end
+			render.DrawQuadEasy(pos_p, normal, 8, 8, transparency_icons, 180)
 		end
+	end
 	
-		render.SetMaterial(muteness_effect_icon)
+	render.SetMaterial(muteness_effect_icon)
 		
-        for i=1, #players do
-            ply = players[i]
+    for i=1, #players do
+        ply = players[i]
 			
-            if (ply:GetNWInt("fon_muteness") == 1) and ply != client then
-				pos_m = ply:GetPos()
-				pos_m.z = pos_m.z + 72
-				pos_m.x = pos_m.x + 10
+        if (ply:GetNWInt("fon_muteness") == 1) and ply != client then
+			pos_m = ply:GetPos()
+			pos_m.z = pos_m.z + 72
+			pos_m.x = pos_m.x + 10
 
-				render.DrawQuadEasy(pos_m, normal, 8, 8, transparency_icons, 180)
-			end
+			render.DrawQuadEasy(pos_m, normal, 8, 8, transparency_icons, 180)
 		end
+	end
 	
-		render.SetMaterial(blindness_effect_icon)
+	render.SetMaterial(blindness_effect_icon)
 		
-        for i=1, #players do
-            ply = players[i]
+    for i=1, #players do
+        ply = players[i]
 			
-            if (ply:GetNWInt("fon_blindness") == 1) and ply != client then
-				pos_b = ply:GetPos()
-				pos_b.z = pos_b.z + 72
-				pos_b.x = pos_b.x - 10
+        if (ply:GetNWInt("fon_blindness") == 1) and ply != client then
+			pos_b = ply:GetPos()
+			pos_b.z = pos_b.z + 72
+			pos_b.x = pos_b.x - 10
 
-				render.DrawQuadEasy(pos_b, normal, 8, 8, transparency_icons, 180)
-			end
+			render.DrawQuadEasy(pos_b, normal, 8, 8, transparency_icons, 180)
 		end
 	end
 end
-hook.Add("PostDrawTranslucentRenderables", "DartGunIconsEffects", WarnTraitorsIcons)
+hook.Add("PostDrawTranslucentRenderables", "DartGunIconsEffects", WarnIcons)
 //----------------------------------------------------------------------------------
 
 // Makes the target go boom (aka Combo with Poison and Flare Gun)
 function yesthisisthesecret(ply, att, infl)
 	local k, v
 	
-	local ex = ents.Create( "env_explosion" )
-		ex:SetPos( ply:GetPos() )
-		ex:SetOwner( att )
+	local ex = ents.Create("env_explosion")
+		ex:SetPos(ply:GetPos())
+		ex:SetOwner(att)
 		ex:Spawn()
-		ex:SetKeyValue( "iMagnitude", "100" )
-		ex:Fire( "Explode", 0, 0 )
-		ex:EmitSound( "siege/big_explosion.wav", 500, 500 )
+		ex:SetKeyValue("iMagnitude", "100")
+		ex:Fire("Explode", 0, 0)
+		ex:EmitSound("siege/big_explosion.wav", 500, 500)
 		
 		ply:TakeDamage(200, att, infl)
 		
-		sound.Play( "siege/big_explosion.wav", ex:GetPos() )
+		sound.Play("siege/big_explosion.wav", ex:GetPos())
 
 end
 
@@ -212,15 +217,15 @@ function DamageTarget(att, path, dmginfo, dmg)
 
 			if ply:IsOnFire() then
 				local effectdata = EffectData()
-				effectdata:SetOrigin( ply:GetPos() )
-				effectdata:SetNormal( ply:GetPos() )
-				effectdata:SetMagnitude( 8 )
-				effectdata:SetScale( 1 )
-				effectdata:SetRadius( 16 )
-				util.Effect( "Sparks", effectdata )
+				effectdata:SetOrigin(ply:GetPos())
+				effectdata:SetNormal(ply:GetPos())
+				effectdata:SetMagnitude(8)
+				effectdata:SetScale(1)
+				effectdata:SetRadius(16)
+				util.Effect("Sparks", effectdata)
 		        
 				if (SERVER) then
-					timer.Simple(0.25, function() yesthisisthesecret(ply, att, infl) end )
+					timer.Simple(0.25, function() yesthisisthesecret(ply, att, infl) end)
 				end
 			end
 			
@@ -302,7 +307,7 @@ function SWEP:Poison()
 	pwn.Num       = 1
 	pwn.Src       = self.Owner:GetShootPos()
 	pwn.Dir       = self.Owner:GetAimVector()
-	pwn.Spread    = Vector( cone, cone, 0 )
+	pwn.Spread    = Vector(cone, cone, 0)
 	pwn.Tracer    = 1
 	pwn.Force     = 2
 	pwn.Damage    = self.Primary.Damage
@@ -316,41 +321,37 @@ function SWEP:Poison()
 	dmg:SetInflictor(self.Weapon)
 end
 
-// Models
-SWEP.ViewModel			= "models/dartgun/v_fon_dartgun.mdl"
-SWEP.WorldModel			= "models/dartgun/w_fon_dartgun.mdl"
-
-// Shot Sound
-SWEP.Primary.Sound = Sound( "weapons/usp/usp1.wav" )
-SWEP.Primary.SoundLevel = 50
-
 function SWEP:Deploy()
 	self.Weapon:SendWeaponAnim(ACT_VM_DRAW_SILENCED)
 	self.Owner:SetNWInt("dart_type", DartGun.DartType)
 	return true
 end
 
+function SWEP:Reload()
+	self.Weapon:DefaultReload(ACT_VM_RELOAD_SILENCED);
+end
+
 // Shoots Dart
 function SWEP:PrimaryAttack()
-    self.Weapon:SetNextPrimaryFire( CurTime() + self.Primary.Delay )
+    self.Weapon:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 
     if not self:CanPrimaryAttack() then return end
 
-    self.Weapon:EmitSound( self.Primary.Sound )
+    self.Weapon:EmitSound(self.Primary.Sound)
 
     self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK_SILENCED)
    
 	self:Poison()
 
-    self:TakePrimaryAmmo( 1 )
+    self:TakePrimaryAmmo(1)
 
     if IsValid(self.Owner) then
-		self.Owner:SetAnimation( PLAYER_ATTACK1 )
+		self.Owner:SetAnimation(PLAYER_ATTACK1)
 
-		self.Owner:ViewPunch( Angle( math.Rand(-0.2,-0.1) * self.Primary.Recoil, math.Rand(-0.1,0.1) *self.Primary.Recoil, 0 ) )
+		self.Owner:ViewPunch(Angle(math.Rand(-0.2,-0.1) * self.Primary.Recoil, math.Rand(-0.1,0.1) *self.Primary.Recoil, 0))
     end
 
-    self.Weapon:SetNWFloat( "LastShootTime", CurTime() )
+    self.Weapon:SetNWFloat("LastShootTime", CurTime())
 end
 
 // SecondaryAttack changes dart type
@@ -384,43 +385,41 @@ hook.Add("Think", "poisononthinkscreen", function()
 					["$pp_colour_mulg"] = 0,
 					["$pp_colour_mulb"] = 0
 				}	
-				DrawColorModify( tab ) // Draws Color Modify effect
-				DrawSobel( 0.5 ) // Draws Sobel effect
+				DrawColorModify(tab) // Draws Color Modify effect
+				DrawSobel(0.5) // Draws Sobel effect
 	
-				DrawMaterialOverlay( "effects/water_warp01", 0.45 )
+				DrawMaterialOverlay("effects/water_warp01", 0.45)
 			end)
 		end
 		
 		if (LocalPlayer():GetNWInt("fon_blindness") == 1) then
             hook.Add("RenderScreenspaceEffects", "FonBlindness", function()
-				DrawSobel( 0 ) // Draws Sobel effect (0 = Black Screen)
+				DrawSobel(0) // Draws Sobel effect (0 = Black Screen)
     	    end)
         end
 		
 		// Cleans Poison Screen Effect
         if (LocalPlayer():GetNWInt("fon_poison") == 0) then
             hook.Add("RenderScreenspaceEffects", "FonPoison", function()
-	        	DrawMaterialOverlay( "", 0 )
+	        	DrawMaterialOverlay("", 0)
     	    end)
         end
 		
 		// Cleans Blindness Screen Effect
 		if (LocalPlayer():GetNWInt("fon_blindness") == 0) then
             hook.Add("RenderScreenspaceEffects", "FonBlindness", function()
-	        	DrawMaterialOverlay( "", 0 )
+	        	DrawMaterialOverlay("", 0)
     	    end)
         end
 		
     end
 end)
 
-// Remove Poison/Muteness/Blindness on Round Start
-hook.Add("TTTPrepareRound", "StopPoison1", function()
-    for k, v in pairs( player.GetAll() ) do
-        v:SetNWInt("fon_poison", 0)
-		v:SetNWInt("fon_muteness", 0)
-		v:SetNWInt("fon_blindness", 0)
-		v:SetNWInt("dart_type", DartGun.DartType)
-    end
+// Remove Poison/Muteness/Blindness on Dead
+hook.Add("PlayerDeath", "StopPoison1", function(victim, inflictor, attacker)
+    victim:SetNWInt("fon_poison", 0)
+	victim:SetNWInt("fon_muteness", 0)
+	victim:SetNWInt("fon_blindness", 0)
+	victim:SetNWInt("dart_type", DartGun.DartType)
 end)
 // ----------------------------
