@@ -18,4 +18,4 @@ DartGun.PoisonTakeDmgRepetitions = 13 // (default: 13)
 DartGun.MuteTime = 5 // (default: 5)
 
 // For how long does the Target stays blind with Blindness dart (in seconds)
-DartGun.BlindTime = 4 // (default: 4)
+DartGun.BlindTime = 20 // (default: 4)
